@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SCARRED CITADEL — Digital & Web Studio</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #070708;
+      --surface: #0f0f12;
+      --surface-2: #16161a;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --text: #f4f4f6;
+      --muted: #8a8a93;
+      --accent: #ffffff;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding-bottom: 96px;
+    }
+
+    /* Subtle noise / ambient glow */
+    .ambient {
+      position: fixed;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 380px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.07) 0%, rgba(7, 7, 8, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.7);
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 28px;
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 30px;
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 92%;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--surface);
+      padding: 5px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 22px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #070708;
+      font-weight: 600;
+    }
+
+    .section {
+      display: none;
+      animation: fadeUp 0.25s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s ease;
+    }
+
+    .card:active {
+      border-color: var(--border-strong);
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .price-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 4px 9px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      font-size: 11px;
+      color: #c4c4cc;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* Cases */
+    .case-card {
+      cursor: pointer;
+    }
+
+    .case-banner {
+      height: 132px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, #15151a 0%, #09090b 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .case-banner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 85% 20%, rgba(255,255,255,0.09), transparent 55%);
+      pointer-events: none;
+    }
+
+    .case-niche {
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .case-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* Calculator */
+    .calc-group {
+      margin-bottom: 18px;
+    }
+
+    .calc-label {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .opt-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 13px 14px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .opt-btn.selected {
+      background: var(--surface-2);
+      border-color: var(--accent);
+    }
+
+    .opt-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .input-field {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-field:focus {
+      border-color: var(--border-strong);
+    }
+
+    .summary-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 18px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .summary-price {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #070708;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn-primary:active {
+      opacity: 0.85;
+    }
+
+    /* Sticky Footer */
+    .sticky-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(7, 7, 8, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      z-index: 20;
+    }
+
+    .sticky-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Drawer / Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      width: 100%;
+      max-width: 520px;
+      background: #101014;
+      border-top: 1px solid var(--border-strong);
+      border-radius: 22px 22px 0 0;
+      padding: 20px 18px calc(22px + env(safe-area-inset-bottom));
+      animation: slideUp 0.22s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-handle {
+      width: 38px;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.2);
+      margin: 0 auto 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">SCARRED CITADEL</div>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        <span>Открыт к проектам</span>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-tag">WEB DESIGN • ZERO BLOCK • IT SOLUTIONS</div>
+      <h1>Цифровая упаковка в эстетике тихой роскоши</h1>
+      <p>Сайты, кастомные анимации и Telegram Mini Apps для брендов, детейлинг-студий и премиального бизнеса.</p>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="services">Услуги</button>
+      <button class="tab-btn" data-tab="cases">Кейсы</button>
+      <button class="tab-btn" data-tab="calc">Расчёт</button>
+    </nav>
+
+    <!-- SERVICES -->
+    <div id="services" class="section active">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Флагманский сайт / Лендинг</div>
+          <div class="price-tag">от 25 000 ₽</div>
+        </div>
+        <p class="card-desc">Уникальный дизайн без шаблонов, Zero Block + кастомный код, плавные микро-анимации и полная адаптация под мобильные.</p>
+        <div class="meta-row">
+          <span class="chip">Tilda Zero / Code</span>
+          <span class="chip">5–10 дней</span>
+          <span class="chip">Dark / Luxury</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Telegram Mini App</div>
+          <div class="price-tag">от 20 000 ₽</div>
+        </div>
+        <p class="card-desc">Веб-приложение внутри Telegram: каталог услуг, интерактивный калькулятор, запись и мгновенная отправка заявок в чат.</p>
+        <div class="meta-row">
+          <span class="chip">WebApp SDK</span>
+          <span class="chip">Без установки</span>
+          <span class="chip">4–7 дней</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Кастомные скрипты & Анимации</div>
+          <div class="price-tag">от 10 000 ₽</div>
+        </div>
+        <p class="card-desc">Доработка существующих сайтов: нестандартные слайдеры, интерактивные калькуляторы, параллакс и визуальная полировка.</p>
+        <div class="meta-row">
+          <span class="chip">JS / CSS</span>
+          <span class="chip">2–4 дня</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Редизайн и упаковка под ключ</div>
+          <div class="price-tag">от 35 000 ₽</div>
+        </div>
+        <p class="card-desc">Полная смена визуального кода бизнеса: от структуры и текстов до запуска сайта и настройки заявок в Telegram / CRM.</p>
+        <div class="meta-row">
+          <span class="chip">Под ключ</span>
+          <span class="chip">10–14 дней</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CASES -->
+    <div id="cases" class="section">
+      <div class="card case-card" data-case="0">
+        <div class="case-banner">
+          <span class="case-niche">AUTO DETAILING • CONCEPT</span>
+          <div class="case-name">NOIR ATELIER</div>
+        </div>
+        <p class="card-desc">Тёмный концепт для премиальной детейлинг-студии: акцент на текстуру, плавные переходы и запись в 2 клика.</p>
+        <div class="meta-row">
+          <span class="chip">Zero Block</span>
+          <span class="chip">Custom JS</span>
+          <span class="chip">Нажми для деталей →</span>
+        </div>
+      </div>
+
+      <div class="card case-card" data-case="1">
+        <div class="case-banner">
+          <span class="case-niche">BRAND / E-COMMERCE</span>
+          <div class="case-name">SCARRED CITADEL</div>
+        </div>
+        <p class="card-desc">Собственный крафт-бренд в эстетике darkwear & grunge: визуальная айдентика, контент-продакшн и цифровая витрина.</p>
+        <div class="meta-row">
+          <span class="chip">Art Direction</span>
+          <span class="chip">UI/UX</span>
+          <span class="chip">Нажми для деталей →</span>
+        </div>
+      </div>
+
+      <div class="card case-card" data-case="2">
+        <div class="case-banner">
+          <span class="case-niche">TELEGRAM MINI APP</span>
+          <div class="case-name">CITADEL WEB APP</div>
+        </div>
+        <p class="card-desc">Нативное приложение для B2B-продаж прямо в профиле Telegram: портфолио, прайс и генератор брифа без лишних переходов.</p>
+        <div class="meta-row">
+          <span class="chip">HTML / JS</span>
+          <span class="chip">TG WebApp API</span>
+          <span class="chip">Нажми для деталей →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALCULATOR -->
+    <div id="calc" class="section">
+      <div class="calc-group">
+        <span class="calc-label">1. Формат проекта</span>
+        <div class="option-list" id="typeOptions">
+          <button class="opt-btn selected" data-name="Флагманский сайт / Лендинг" data-price="25000">
+            <span>Флагманский сайт</span>
+            <span class="opt-sub">от 25 000 ₽</span>
+          </button>
+          <button class="opt-btn" data-name="Telegram Mini App" data-price="20000">
+            <span>Telegram Mini App</span>
+            <span class="opt-sub">от 20 000 ₽</span>
+          </button>
+          <button class="opt-btn" data-name="Многостраничный сайт под ключ" data-price="40000">
+            <span>Многостраничник под ключ</span>
+            <span class="opt-sub">от 40 000 ₽</span>
+          </button>
+          <button class="opt-btn" data-name="Кастомные скрипты / Доработка" data-price="10000">
+            <span>Скрипты / Анимации</span>
+            <span class="opt-sub">от 10 000 ₽</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <span class="calc-label">2. Дополнительно (можно несколько)</span>
+        <div class="option-list" id="addonOptions">
+          <button class="opt-btn" data-name="Кастомные анимации и JS-интерактив" data-price="7000">
+            <span>Продвинутые анимации (JS)</span>
+            <span class="opt-sub">+7 000 ₽</span>
+          </button>
+          <button class="opt-btn" data-name="Интеграция заявок в Telegram / CRM" data-price="4000">
+            <span>Заявки в Telegram / CRM</span>
+            <span class="opt-sub">+4 000 ₽</span>
+          </button>
+          <button class="opt-btn" data-name="Срочный запуск (приоритет)" data-price="8000">
+            <span>Срочный запуск</span>
+            <span class="opt-sub">+8 000 ₽</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="calc-group">
+        <span class="calc-label">3. Ниша или ссылка на ваш бизнес (необязательно)</span>
+        <input type="text" id="nicheInput" class="input-field" placeholder="Например: детейлинг-студия в Москве" />
+      </div>
+
+      <div class="summary-box">
+        <div class="summary-row">
+          <span class="opt-sub">Ориентировочный бюджет</span>
+          <span class="summary-price" id="totalPrice">от 25 000 ₽</span>
+        </div>
+        <button class="btn-primary" id="sendBriefBtn">Отправить бриф в Telegram</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Bottom Bar -->
+  <div class="sticky-bar">
+    <div class="sticky-inner">
+      <button class="btn-ghost" id="quickCalcBtn">Калькулятор</button>
+      <button class="btn-primary" id="contactBtn">Обсудить проект</button>
+    </div>
+  </div>
+
+  <!-- Case Modal -->
+  <div class="modal-backdrop" id="caseModal">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="case-niche" id="modalNiche" style="margin-bottom:6px;"></div>
+      <h2 id="modalTitle" style="font-family:'Syne',sans-serif; font-size:22px; margin-bottom:10px;"></h2>
+      <p id="modalDesc" style="font-size:14px; color:var(--muted); margin-bottom:16px;"></p>
+      <div id="modalTags" class="meta-row" style="margin-bottom:20px;"></div>
+      <button class="btn-primary" id="modalOrderBtn">Хочу проект в таком стиле</button>
+    </div>
+  </div>
+
+  <script>
+    const STUDIO_CONFIG = {
+      brandName: 'SCARRED CITADEL',
+      telegramUsername: 'Owner_ScarredCitadel'
+    };
+
+    const CASES = [
+      {
+        niche: 'AUTO DETAILING • CONCEPT',
+        title: 'NOIR ATELIER',
+        desc: 'Концепт флагманского сайта для детейлинг-студии. Построен на контрасте тёмной палитры, чистой типографики и плавной анимации блоков. Задача — отстроиться от шаблонных сайтов конкурентов и поднять средний чек.',
+        tags: ['Tilda Zero Block', 'Custom JS', 'Адаптив', 'Silent Luxury']
+      },
+      {
+        niche: 'BRAND / E-COMMERCE',
+        title: 'SCARRED CITADEL',
+        desc: 'Собственный дизайн-проект с характером и узнаваемым визуальным кодом. Полная проработка эстетики, презентации продукта и пользовательского пути без лишнего визуального шума.',
+        tags: ['Art Direction', 'Darkwear', 'UI/UX', 'Branding']
+      },
+      {
+        niche: 'TELEGRAM MINI APP',
+        title: 'CITADEL WEB APP',
+        desc: 'Лёгкое и быстрое веб-приложение внутри Telegram. Открывается за секунду прямо из профиля, показывает уровень студии, считает примерный бюджет и отправляет структурированный бриф в личку.',
+        tags: ['HTML / CSS / JS', 'Telegram WebApp SDK', 'Haptic Feedback']
+      }
+    ];
+
+    // Telegram WebApp Init
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.setHeaderColor) tg.setHeaderColor('#070708');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#070708');
+    }
+
+    function haptic(style = 'light') {
+      if (tg && tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred(style);
+      }
+    }
+
+    function openTelegramChat(message) {
+      haptic('medium');
+      const url = `https://t.me/${STUDIO_CONFIG.telegramUsername}?text=${encodeURIComponent(message)}`;
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(url);
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+
+    // Tabs
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const sections = document.querySelectorAll('.section');
+
+    function switchTab(tabId) {
+      haptic('light');
+      tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+      sections.forEach(s => s.classList.toggle('active', s.id === tabId));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('quickCalcBtn').addEventListener('click', () => switchTab('calc'));
+    document.getElementById('contactBtn').addEventListener('click', () => {
+      openTelegramChat('Здравствуйте! Пишу из Mini App SCARRED CITADEL, хочу обсудить проект.');
+    });
+
+    // Calculator Logic
+    let selectedType = { name: 'Флагманский сайт / Лендинг', price: 25000 };
+    const selectedAddons = new Set();
+
+    function updateTotal() {
+      let total = selectedType.price;
+      selectedAddons.forEach(btn => {
+        total += Number(btn.dataset.price);
+      });
+      document.getElementById('totalPrice').textContent = `от ${total.toLocaleString('ru-RU')} ₽`;
+    }
+
+    document.querySelectorAll('#typeOptions .opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptic('light');
+        document.querySelectorAll('#typeOptions .opt-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedType = { name: btn.dataset.name, price: Number(btn.dataset.price) };
+        updateTotal();
+      });
+    });
+
+    document.querySelectorAll('#addonOptions .opt-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        haptic('light');
+        if (selectedAddons.has(btn)) {
+          selectedAddons.delete(btn);
+          btn.classList.remove('selected');
+        } else {
+          selectedAddons.add(btn);
+          btn.classList.add('selected');
+        }
+        updateTotal();
+      });
+    });
+
+    document.getElementById('sendBriefBtn').addEventListener('click', () => {
+      const niche = document.getElementById('nicheInput').value.trim();
+      const addonsList = Array.from(selectedAddons).map(b => b.dataset.name);
+      const totalText = document.getElementById('totalPrice').textContent;
+
+      let text = `Здравствуйте! Заявка из Mini App SCARRED CITADEL:\n\n`;
+      text += `• Формат: ${selectedType.name}\n`;
+      if (addonsList.length) text += `• Дополнительно: ${addonsList.join(', ')}\n`;
+      if (niche) text += `• Бизнес / ниша: ${niche}\n`;
+      text += `• Ориентир: ${totalText}\n\nХочу обсудить детали.`;
+
+      openTelegramChat(text);
+    });
+
+    // Case Modal Logic
+    const modal = document.getElementById('caseModal');
+    let currentCaseTitle = '';
+
+    document.querySelectorAll('.case-card').forEach(card => {
+      card.addEventListener('click', () => {
+        haptic('light');
+        const c = CASES[Number(card.dataset.case)];
+        currentCaseTitle = c.title;
+        document.getElementById('modalNiche').textContent = c.niche;
+        document.getElementById('modalTitle').textContent = c.title;
+        document.getElementById('modalDesc').textContent = c.desc;
+        document.getElementById('modalTags').innerHTML = c.tags.map(t => `<span class="chip">${t}</span>`).join('');
+        modal.classList.add('open');
+      });
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('open');
+    });
+
+    document.getElementById('modalOrderBtn').addEventListener('click', () => {
+      modal.classList.remove('open');
+      openTelegramChat(`Здравствуйте! Понравился кейс «${currentCaseTitle}» в Mini App. Хочу обсудить проект в похожем стиле.`);
+    });
+  </script>
+</body>
+</html>
